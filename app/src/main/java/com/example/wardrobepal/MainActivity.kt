@@ -1,91 +1,45 @@
 package com.example.wardrobepal
 
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.wardrobepal.ui.theme.WardrobePalTheme
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+    private val wardrobe = mutableListOf<ClothingItem>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            WardrobePalTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    MainActivityContent()
-                }
+        setContentView(R.layout.activity_main)
+
+        val itemNameInput: EditText = findViewById(R.id.itemNameInput)
+        val itemTypeInput: EditText = findViewById(R.id.itemTypeInput)
+        val itemColorInput: EditText = findViewById(R.id.itemColorInput)
+        val addItemButton: Button = findViewById(R.id.addItemButton)
+        val suggestOutfitButton: Button = findViewById(R.id.suggestOutfitButton)
+        val outputTextView: TextView = findViewById(R.id.outputTextView)
+
+        addItemButton.setOnClickListener {
+            val name = itemNameInput.text.toString()
+            val type = itemTypeInput.text.toString()
+            val color = itemColorInput.text.toString()
+            wardrobe.add(ClothingItem(name, type, color))
+            outputTextView.text = "Item added: $name, $type, $color"
+        }
+
+        suggestOutfitButton.setOnClickListener {
+            val shirts = wardrobe.filter { it.type.equals("SHIRT", ignoreCase = true) }
+            val pants = wardrobe.filter { it.type.equals("PANTS", ignoreCase = true) }
+            if (shirts.isNotEmpty() && pants.isNotEmpty()) {
+                val shirt = shirts.random()
+                val pant = pants.random()
+                outputTextView.text = "Suggested outfit: ${shirt.name} (Color: ${shirt.color}) and ${pant.name} (Color: ${pant.color})"
+            } else {
+                outputTextView.text = "Please add at least one shirt and one pair of pants."
             }
         }
     }
 }
 
-@Composable
-fun MainActivityContent() {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Greeting(name = "Praveen")
-        RedButton(
-            onClick = { /* Do something when button is clicked */ },
-            backgroundColor = MaterialTheme.colors.error,
-            contentColor = MaterialTheme.colors.onError,
-            buttonText = "Click me"
-        )
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun RedButton(
-    onClick: () -> Unit,
-    backgroundColor: Color,
-    contentColor: Color,
-    buttonText: String,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        backgroundColor = backgroundColor,
-        contentColor = contentColor
-    ) {
-        Text(text = buttonText)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WardrobePalTheme {
-        Greeting("Praveen")
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RedButtonPreview() {
-    WardrobePalTheme {
-        RedButton(
-            onClick = { /* Dummy click action */ },
-            backgroundColor = MaterialTheme.colors.error,
-            contentColor = MaterialTheme.colors.onError,
-            buttonText = "Click me"
-        )
-    }
-}
+data class ClothingItem(val name: String, val type: String, val color: String)
